@@ -20,7 +20,8 @@
 		],
 		"client": [
 			"com.taghighlight.TagHighlightClient"
-		]
+		],
+		"modmenu": ["com.taghighlight.config.TagHighlightModMenu"]
 	},
 	"mixins": [
 		"tag-highlight.mixins.json",
@@ -36,6 +37,6 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
-		"another-mod": "*"
+		"modmenu": ">=7.0.0"
 	}
 }
