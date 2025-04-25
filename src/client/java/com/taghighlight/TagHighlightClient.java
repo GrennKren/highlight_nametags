@@ -192,20 +192,20 @@ public class TagHighlightClient implements ClientModInitializer {
 
 				// Draw header
 				drawContext.getMatrices().push();
-				drawContext.getMatrices().scale(1.2f, 1.2f, 1.0f);
-				drawContext.drawText(client.textRenderer, Text.literal("Stats for: " + currentHeldTagName), 10, (int)(y / 1.2f), 0xFFFFFF, false);
+				//drawContext.getMatrices().scale(1.2f, 1.2f, 1.0f);
+				drawContext.drawText(client.textRenderer, Text.literal("Stats for: " + currentHeldTagName), 10, (int)(y / 1.2f), 0xDDAA00, true);
 				drawContext.getMatrices().pop();
 				y += 15;
 
 				// Draw total count
-				drawContext.drawText(client.textRenderer, Text.literal("All: " + totalCount), 10, y, 0xFFFFFF, false);
+				drawContext.drawText(client.textRenderer, Text.literal("All: " + totalCount), 10, y, 0xDDAA00, true);
 				y += 12;
 
 				// Draw counts for each entity type
 				for (Map.Entry<String, Integer> entry : entityTypeCount.entrySet()) {
 					drawContext.drawText(client.textRenderer,
 							Text.literal(entry.getKey() + ": " + entry.getValue()),
-							10, y, 0xFFFFFF, false);
+							10, y, 0xDDAA00, true);
 					y += 12;
 				}
 			}
