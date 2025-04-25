@@ -218,16 +218,6 @@ public class TagHighlightModMenu implements ModMenuApi {
         @Override
         public void render(DrawContext context, int mouseX, int mouseY, float delta) {
             this.renderBackground(context, mouseX, mouseY, delta);
-            context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 15, 0xFFFFFF);
-
-            // Section titles
-            context.drawCenteredTextWithShadow(this.textRenderer,
-                    Text.translatable("text.tag-highlight.config.normal_mode"),
-                    this.width / 2, this.height / 6, 0xFFFFFF);
-
-            context.drawCenteredTextWithShadow(this.textRenderer,
-                    Text.translatable("text.tag-highlight.config.stats_mode"),
-                    this.width / 2, this.height / 6 + 180, 0xFFFFFF);
 
             // Render normal mode color preview box
             int previewX = this.width / 2 + PREVIEW_X_OFFSET;
@@ -239,10 +229,6 @@ public class TagHighlightModMenu implements ModMenuApi {
             int blue = (int)(TagHighlightClient.CONFIG.outlineBlue * 255);
             int alpha = (int)(TagHighlightClient.CONFIG.outlineAlpha * 255);
             int color = (alpha << 24) | (red << 16) | (green << 8) | blue;
-
-            // Draw color preview label
-            context.drawTextWithShadow(this.textRenderer, Text.translatable("options.tag-highlight.preview"),
-                    previewX - 5, previewY - 15, 0xFFFFFF);
 
             // Draw outer border (black)
             context.fill(previewX - 2, previewY - 2, previewX + PREVIEW_SIZE + 2, previewY + PREVIEW_SIZE + 2, 0xFF000000);
@@ -282,13 +268,9 @@ public class TagHighlightModMenu implements ModMenuApi {
             alpha = (int)(TagHighlightClient.CONFIG.statsModeAlpha * 255);
             color = (alpha << 24) | (red << 16) | (green << 8) | blue;
 
-            // Draw stats color preview label
-            context.drawTextWithShadow(this.textRenderer, Text.translatable("options.tag-highlight.stats_preview"),
-                    previewX - 5, previewY - 15, 0xFFFFFF);
-
             // Draw outer border (black)
             context.fill(previewX - 2, previewY - 2, previewX + PREVIEW_SIZE + 2, previewY + PREVIEW_SIZE + 2, 0xFF000000);
-
+//
             // Draw inner border (white)
             context.fill(previewX - 1, previewY - 1, previewX + PREVIEW_SIZE + 1, previewY + PREVIEW_SIZE + 1, 0xFFFFFFFF);
 
