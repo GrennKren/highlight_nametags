@@ -5,7 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -14,7 +15,6 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -47,6 +47,9 @@ public class TagHighlightClient implements ClientModInitializer {
 
 	// Track the currently held name tag's custom name
 	private static String currentHeldTagName = null;
+
+	public static final Identifier MY_HUD_LAYER = Identifier.of("modid", "my_hud_layer");
+
 
 	@Override
 	public void onInitializeClient() {
@@ -85,7 +88,7 @@ public class TagHighlightClient implements ClientModInitializer {
 			if (CONFIG.statsMode && currentHeldTagName != null) {
 				// Stats mode - find entities with same name as the held tag
 				for (Entity entity : client.world.getEntitiesByClass(MobEntity.class, searchBox, e -> true)) {
-					if (entity.hasCustomName() && entity.getCustomName().getString().equals(currentHeldTagName)) {
+					if (entity.hasCustomName() && entity.getCustomName() != null && entity.getCustomName().getString().equals(currentHeldTagName)) {
 						statsMatchingEntities.add(entity);
 
 						// Count by entity type
@@ -104,7 +107,7 @@ public class TagHighlightClient implements ClientModInitializer {
 		});
 
 		// Register render event untuk menggambar outline box
-		WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
+		WorldRenderEvents.AFTER_TRANSLUCENT.register((context) -> {
 			MinecraftClient client = MinecraftClient.getInstance();
 			if (client.world == null || client.player == null) return;
 
@@ -150,7 +153,8 @@ public class TagHighlightClient implements ClientModInitializer {
 			// Jika outline diaktifkan di config dan ada entitas untuk di-render
 			if (CONFIG.outlineEnabled && !entitiesToRender.isEmpty()) {
 				for (Entity entity : entitiesToRender) {
-					matrices.push();
+                    assert matrices != null;
+                    matrices.push();
 					double x = entity.getX() - cameraPos.x;
 					double y = entity.getY() - cameraPos.y;
 					double z = entity.getZ() - cameraPos.z;
@@ -172,9 +176,7 @@ public class TagHighlightClient implements ClientModInitializer {
 			if (cullEnabled) RenderSystem.enableCull();
 		});
 
-		// Register HUD renderer for stats mode
-		// Register HUD renderer for stats mode
-		HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
+		HudLayerRegistrationCallback.EVENT.register(layers -> layers.attachLayerBefore(IdentifiedLayer.CHAT, MY_HUD_LAYER, (drawContext, tickDelta) -> {
 			MinecraftClient client = MinecraftClient.getInstance();
 			if (client.world == null || client.player == null || !CONFIG.statsMode || currentHeldTagName == null) {
 				return;
@@ -209,7 +211,7 @@ public class TagHighlightClient implements ClientModInitializer {
 					y += 12;
 				}
 			}
-		});
+		}));
 	}
 
 	// Helper method to get readable entity type name
@@ -218,7 +220,7 @@ public class TagHighlightClient implements ClientModInitializer {
 		String path = id.getPath();
 
 		// Capitalize first letter and replace underscores with spaces
-		if (path.length() > 0) {
+		if (!path.isEmpty()) {
 			path = Character.toUpperCase(path.charAt(0)) + path.substring(1);
 		}
 
