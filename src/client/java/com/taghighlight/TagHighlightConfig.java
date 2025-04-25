@@ -1,10 +1,12 @@
 package com.taghighlight;
 
 public class TagHighlightConfig {
-    public enum RenderStyle {
-        OUTLINE_BOX,
-        GLOWING
-    }
+    // Warna outline (nilai dari 0.0f sampai 1.0f)
+    public float outlineRed = 1.0f;
+    public float outlineGreen = 0.0f;
+    public float outlineBlue = 0.0f;
+    public float outlineAlpha = 1.0f;
 
-    public RenderStyle renderStyle = RenderStyle.GLOWING;
+    // Toggle apakah outline ditampilkan
+    public boolean outlineEnabled = true;
 }
