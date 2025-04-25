@@ -1,24 +1,19 @@
 package com.taghighlight;
 
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.World;
 
 public class TagNameHandler {
 
     public static void register() {
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             // Check if we're on the server side and it's the main hand
-            if (world.isClient || hand != Hand.MAIN_HAND) {
+            if (hand != Hand.MAIN_HAND) {
                 return ActionResult.PASS;
             }
 
@@ -44,9 +39,9 @@ public class TagNameHandler {
             // Check if prevent duplicate names feature is enabled
             if (TagHighlightClient.CONFIG.preventDuplicateNamesEnabled) {
                 // Check if mob already has a name and if it's the same as the name tag
-                if (mob.hasCustomName() && mob.getCustomName().getString().equals(nameTagText)) {
+                if (mob.hasCustomName() && mob.getCustomName() != null && mob.getCustomName().getString().equals(nameTagText)) {
                     // Cancel the interaction and notify the player
-                    player.sendMessage(Text.translatable("message.tag-highlight.same_name"), true);
+                    player.sendMessage(Text.translatable("message.tag-highlight.same_name"), false);
                     return ActionResult.FAIL;
                 }
             }
