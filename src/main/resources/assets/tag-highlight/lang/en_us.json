@@ -1,0 +1,7 @@
+{
+  "text.tag-highlight.config": "Tag Highlight Settings",
+  "options.tag-highlight.render_style": "Render Style",
+  "options.tag-highlight.render_style.outline_box": "Outline Box",
+  "options.tag-highlight.render_style.glowing": "Glowing Effect",
+  "options.tag-highlight.render_style.both": "Both"
+}
