@@ -1,3 +1,4 @@
+// First, update TagHighlightConfig.java to add the new properties
 package com.taghighlight;
 
 public class TagHighlightConfig {
@@ -11,4 +12,13 @@ public class TagHighlightConfig {
     public boolean outlineEnabled = true;
 
     public boolean preventDuplicateNamesEnabled = true;
+
+    // Toggle stats mode
+    public boolean statsMode = false;
+
+    // Stats mode colors
+    public float statsModeRed = 0.0f;
+    public float statsModeGreen = 1.0f;
+    public float statsModeBlue = 1.0f;
+    public float statsModeAlpha = 1.0f;
 }

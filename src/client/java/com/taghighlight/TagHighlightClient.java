@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -13,7 +14,13 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
@@ -24,15 +31,22 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TagHighlightClient implements ClientModInitializer {
 	private static final double HIGHLIGHT_RADIUS = 50.0;
 	private static final List<Entity> entitiesToHighlight = new ArrayList<>();
+	private static final List<Entity> statsMatchingEntities = new ArrayList<>();
+	private static final Map<String, Integer> entityTypeCount = new HashMap<>();
 
 	public static TagHighlightConfig CONFIG;
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static final File CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve("tag-highlight.json").toFile();
+
+	// Track the currently held name tag's custom name
+	private static String currentHeldTagName = null;
 
 	@Override
 	public void onInitializeClient() {
@@ -49,7 +63,17 @@ public class TagHighlightClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.world == null || client.player == null) return;
 
+			// Clear entity lists
 			entitiesToHighlight.clear();
+			statsMatchingEntities.clear();
+			entityTypeCount.clear();
+
+			// Check if player is holding a name tag with custom name
+			currentHeldTagName = null;
+			ItemStack heldItem = client.player.getMainHandStack();
+			if (heldItem.getItem() == Items.NAME_TAG && heldItem.getCustomName() != null ) {
+				currentHeldTagName = heldItem.getName().getString();
+			}
 
 			Vec3d playerPos = client.player.getPos();
 			Box searchBox = new Box(
@@ -57,9 +81,24 @@ public class TagHighlightClient implements ClientModInitializer {
 					playerPos.x + HIGHLIGHT_RADIUS, playerPos.y + HIGHLIGHT_RADIUS, playerPos.z + HIGHLIGHT_RADIUS
 			);
 
-			for (Entity entity : client.world.getEntitiesByClass(MobEntity.class, searchBox, e -> true)) {
-				if (!entity.hasCustomName() && entity != client.player) {
-					entitiesToHighlight.add(entity);
+			// Find entities based on current mode
+			if (CONFIG.statsMode && currentHeldTagName != null) {
+				// Stats mode - find entities with same name as the held tag
+				for (Entity entity : client.world.getEntitiesByClass(MobEntity.class, searchBox, e -> true)) {
+					if (entity.hasCustomName() && entity.getCustomName().getString().equals(currentHeldTagName)) {
+						statsMatchingEntities.add(entity);
+
+						// Count by entity type
+						String typeName = getEntityTypeName(entity);
+						entityTypeCount.put(typeName, entityTypeCount.getOrDefault(typeName, 0) + 1);
+					}
+				}
+			} else if (!CONFIG.statsMode) {
+				// Normal mode - find entities without custom names
+				for (Entity entity : client.world.getEntitiesByClass(MobEntity.class, searchBox, e -> true)) {
+					if (!entity.hasCustomName() && entity != client.player) {
+						entitiesToHighlight.add(entity);
+					}
 				}
 			}
 		});
@@ -87,15 +126,30 @@ public class TagHighlightClient implements ClientModInitializer {
 			GL11.glDepthFunc(GL11.GL_ALWAYS);
 			RenderSystem.enableDepthTest();
 			RenderSystem.depthMask(false);
-			// Jangan set glLineWidth agar menghindari warning
 
 			// Dapatkan buffer untuk menggambar garis
 			VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
 			VertexConsumer lineConsumer = immediate.getBuffer(RenderLayer.getLines());
 
-			// Jika outline diaktifkan di config, gambar outline box untuk tiap entitas
-			if (CONFIG.outlineEnabled) {
-				for (Entity entity : entitiesToHighlight) {
+			// Chose which entity list and colors to use based on current mode
+			List<Entity> entitiesToRender = CONFIG.statsMode ? statsMatchingEntities : entitiesToHighlight;
+			float red, green, blue, alpha;
+
+			if (CONFIG.statsMode) {
+				red = CONFIG.statsModeRed;
+				green = CONFIG.statsModeGreen;
+				blue = CONFIG.statsModeBlue;
+				alpha = CONFIG.statsModeAlpha;
+			} else {
+				red = CONFIG.outlineRed;
+				green = CONFIG.outlineGreen;
+				blue = CONFIG.outlineBlue;
+				alpha = CONFIG.outlineAlpha;
+			}
+
+			// Jika outline diaktifkan di config dan ada entitas untuk di-render
+			if (CONFIG.outlineEnabled && !entitiesToRender.isEmpty()) {
+				for (Entity entity : entitiesToRender) {
 					matrices.push();
 					double x = entity.getX() - cameraPos.x;
 					double y = entity.getY() - cameraPos.y;
@@ -103,8 +157,7 @@ public class TagHighlightClient implements ClientModInitializer {
 					matrices.translate(x, y, z);
 
 					Box box = entity.getBoundingBox().offset(-entity.getX(), -entity.getY(), -entity.getZ());
-					// Gunakan warna outline dari config
-					drawOutlineBox(matrices, lineConsumer, box, CONFIG.outlineRed, CONFIG.outlineGreen, CONFIG.outlineBlue, CONFIG.outlineAlpha);
+					drawOutlineBox(matrices, lineConsumer, box, red, green, blue, alpha);
 					matrices.pop();
 				}
 			}
@@ -118,6 +171,58 @@ public class TagHighlightClient implements ClientModInitializer {
 			if (!blendEnabled) RenderSystem.disableBlend();
 			if (cullEnabled) RenderSystem.enableCull();
 		});
+
+		// Register HUD renderer for stats mode
+		// Register HUD renderer for stats mode
+		HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
+			MinecraftClient client = MinecraftClient.getInstance();
+			if (client.world == null || client.player == null || !CONFIG.statsMode || currentHeldTagName == null) {
+				return;
+			}
+
+			// Only render if we have stats to show
+			if (!entityTypeCount.isEmpty()) {
+				int y = 10;
+
+				// Calculate total count
+				int totalCount = 0;
+				for (int count : entityTypeCount.values()) {
+					totalCount += count;
+				}
+
+				// Draw header
+				drawContext.getMatrices().push();
+				drawContext.getMatrices().scale(1.2f, 1.2f, 1.0f);
+				drawContext.drawText(client.textRenderer, Text.literal("Stats for: " + currentHeldTagName), 10, (int)(y / 1.2f), 0xFFFFFF, false);
+				drawContext.getMatrices().pop();
+				y += 15;
+
+				// Draw total count
+				drawContext.drawText(client.textRenderer, Text.literal("All: " + totalCount), 10, y, 0xFFFFFF, false);
+				y += 12;
+
+				// Draw counts for each entity type
+				for (Map.Entry<String, Integer> entry : entityTypeCount.entrySet()) {
+					drawContext.drawText(client.textRenderer,
+							Text.literal(entry.getKey() + ": " + entry.getValue()),
+							10, y, 0xFFFFFF, false);
+					y += 12;
+				}
+			}
+		});
+	}
+
+	// Helper method to get readable entity type name
+	private String getEntityTypeName(Entity entity) {
+		Identifier id = Registries.ENTITY_TYPE.getId(entity.getType());
+		String path = id.getPath();
+
+		// Capitalize first letter and replace underscores with spaces
+		if (path.length() > 0) {
+			path = Character.toUpperCase(path.charAt(0)) + path.substring(1);
+		}
+
+		return path.replace('_', ' ');
 	}
 
 	// Custom drawing untuk outline box

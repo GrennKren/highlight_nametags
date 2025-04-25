@@ -1,17 +1,28 @@
 {
-  "text.tag-highlight.config": "Tag Highlight Settings",
+  "text.tag-highlight.config": "Tag Highlight Configuration",
+  "text.tag-highlight.config.normal_mode": "Normal Mode Settings",
+  "text.tag-highlight.config.stats_mode": "Statistics Mode Settings",
 
   "category.tag-highlight.keybinds": "Tag Highlight",
-  "key.tag-highlight.toggle_outline": "Toggle Entity Outline",
+  "key.tag-highlight.toggle_outline": "Toggle Outline",
+  "key.tag-highlight.toggle_stats_mode": "Toggle Statistics Mode",
 
-  "options.tag-highlight.outline.red": "Red: %d",
-  "options.tag-highlight.outline.green": "Green: %d",
-  "options.tag-highlight.outline.blue": "Blue: %d",
-  "options.tag-highlight.outline.alpha": "Opacity: %d%%",
-  "options.tag-highlight.outline.enabled": "Outline Enabled: %s",
-  "options.tag-highlight.preview": "Color Preview",
+  "options.tag-highlight.outline.red": "Outline Red: %d",
+  "options.tag-highlight.outline.green": "Outline Green: %d",
+  "options.tag-highlight.outline.blue": "Outline Blue: %d",
+  "options.tag-highlight.outline.alpha": "Outline Opacity: %d%%",
+  "options.tag-highlight.outline.enabled": "Show Outline: %s",
 
-  "message.tag-highlight.same_name": "§cThis mob already has the same name!",
+  "options.tag-highlight.stats_mode.red": "Stats Mode Red: %d",
+  "options.tag-highlight.stats_mode.green": "Stats Mode Green: %d",
+  "options.tag-highlight.stats_mode.blue": "Stats Mode Blue: %d",
+  "options.tag-highlight.stats_mode.alpha": "Stats Mode Opacity: %d%%",
+  "options.tag-highlight.stats_mode.enabled": "Statistics Mode: %s",
 
-  "options.tag-highlight.prevent_duplicate.enabled": "Prevent Duplicate Names: %s"
+  "options.tag-highlight.prevent_duplicate.enabled": "Prevent Duplicate Names: %s",
+
+  "options.tag-highlight.preview": "Normal Mode Color Preview",
+  "options.tag-highlight.stats_preview": "Stats Mode Color Preview",
+
+  "message.tag-highlight.same_name": "This mob already has the same name!"
 }
