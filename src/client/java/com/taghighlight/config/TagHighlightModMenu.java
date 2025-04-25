@@ -3,7 +3,6 @@ package com.taghighlight.config;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import com.taghighlight.TagHighlightClient;
-import com.taghighlight.TagHighlightConfig;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -19,15 +18,6 @@ public class TagHighlightModMenu implements ModMenuApi {
 
     public static class TagHighlightConfigScreen extends Screen {
         private final Screen parent;
-        private SliderWidget redSlider;
-        private SliderWidget greenSlider;
-        private SliderWidget blueSlider;
-        private SliderWidget alphaSlider;
-
-        private SliderWidget statsRedSlider;
-        private SliderWidget statsGreenSlider;
-        private SliderWidget statsBlueSlider;
-        private SliderWidget statsAlphaSlider;
 
         // Constants for color preview dimensions
         private static final int PREVIEW_SIZE = 30;
@@ -46,8 +36,8 @@ public class TagHighlightModMenu implements ModMenuApi {
 
             // Regular outline color controls
             // Slider untuk Outline Red
-            redSlider = new SliderWidget(this.width / 2 - 100, yBase + 24, 200, 20,
-                    Text.translatable("options.tag-highlight.outline.red", (int)(TagHighlightClient.CONFIG.outlineRed * 255)),
+            SliderWidget redSlider = new SliderWidget(this.width / 2 - 100, yBase + 24, 200, 20,
+                    Text.translatable("options.tag-highlight.outline.red", (int) (TagHighlightClient.CONFIG.outlineRed * 255)),
                     TagHighlightClient.CONFIG.outlineRed) {
                 @Override
                 protected void updateMessage() {
@@ -56,15 +46,15 @@ public class TagHighlightModMenu implements ModMenuApi {
 
                 @Override
                 protected void applyValue() {
-                    TagHighlightClient.CONFIG.outlineRed = (float)this.value;
-                    this.setMessage(Text.translatable("options.tag-highlight.outline.red", (int)(this.value * 255)));
+                    TagHighlightClient.CONFIG.outlineRed = (float) this.value;
+                    this.setMessage(Text.translatable("options.tag-highlight.outline.red", (int) (this.value * 255)));
                 }
             };
             this.addDrawableChild(redSlider);
 
             // Slider untuk Outline Green
-            greenSlider = new SliderWidget(this.width / 2 - 100, yBase + 50, 200, 20,
-                    Text.translatable("options.tag-highlight.outline.green", (int)(TagHighlightClient.CONFIG.outlineGreen * 255)),
+            SliderWidget greenSlider = new SliderWidget(this.width / 2 - 100, yBase + 50, 200, 20,
+                    Text.translatable("options.tag-highlight.outline.green", (int) (TagHighlightClient.CONFIG.outlineGreen * 255)),
                     TagHighlightClient.CONFIG.outlineGreen) {
                 @Override
                 protected void updateMessage() {
@@ -73,15 +63,15 @@ public class TagHighlightModMenu implements ModMenuApi {
 
                 @Override
                 protected void applyValue() {
-                    TagHighlightClient.CONFIG.outlineGreen = (float)this.value;
-                    this.setMessage(Text.translatable("options.tag-highlight.outline.green", (int)(this.value * 255)));
+                    TagHighlightClient.CONFIG.outlineGreen = (float) this.value;
+                    this.setMessage(Text.translatable("options.tag-highlight.outline.green", (int) (this.value * 255)));
                 }
             };
             this.addDrawableChild(greenSlider);
 
             // Slider untuk Outline Blue
-            blueSlider = new SliderWidget(this.width / 2 - 100, yBase + 76, 200, 20,
-                    Text.translatable("options.tag-highlight.outline.blue", (int)(TagHighlightClient.CONFIG.outlineBlue * 255)),
+            SliderWidget blueSlider = new SliderWidget(this.width / 2 - 100, yBase + 76, 200, 20,
+                    Text.translatable("options.tag-highlight.outline.blue", (int) (TagHighlightClient.CONFIG.outlineBlue * 255)),
                     TagHighlightClient.CONFIG.outlineBlue) {
                 @Override
                 protected void updateMessage() {
@@ -90,15 +80,15 @@ public class TagHighlightModMenu implements ModMenuApi {
 
                 @Override
                 protected void applyValue() {
-                    TagHighlightClient.CONFIG.outlineBlue = (float)this.value;
-                    this.setMessage(Text.translatable("options.tag-highlight.outline.blue", (int)(this.value * 255)));
+                    TagHighlightClient.CONFIG.outlineBlue = (float) this.value;
+                    this.setMessage(Text.translatable("options.tag-highlight.outline.blue", (int) (this.value * 255)));
                 }
             };
             this.addDrawableChild(blueSlider);
 
             // Slider untuk Outline Alpha
-            alphaSlider = new SliderWidget(this.width / 2 - 100, yBase + 102, 200, 20,
-                    Text.translatable("options.tag-highlight.outline.alpha", (int)(TagHighlightClient.CONFIG.outlineAlpha * 100)),
+            SliderWidget alphaSlider = new SliderWidget(this.width / 2 - 100, yBase + 102, 200, 20,
+                    Text.translatable("options.tag-highlight.outline.alpha", (int) (TagHighlightClient.CONFIG.outlineAlpha * 100)),
                     TagHighlightClient.CONFIG.outlineAlpha) {
                 @Override
                 protected void updateMessage() {
@@ -107,8 +97,8 @@ public class TagHighlightModMenu implements ModMenuApi {
 
                 @Override
                 protected void applyValue() {
-                    TagHighlightClient.CONFIG.outlineAlpha = (float)this.value;
-                    this.setMessage(Text.translatable("options.tag-highlight.outline.alpha", (int)(this.value * 100)));
+                    TagHighlightClient.CONFIG.outlineAlpha = (float) this.value;
+                    this.setMessage(Text.translatable("options.tag-highlight.outline.alpha", (int) (this.value * 100)));
                 }
             };
             this.addDrawableChild(alphaSlider);
@@ -142,8 +132,8 @@ public class TagHighlightModMenu implements ModMenuApi {
                     }).dimensions(this.width / 2 - 100, yBase + 180, 200, 20).build());
 
             // Stats mode color controls
-            statsRedSlider = new SliderWidget(this.width / 2 - 100, yBase + 206, 200, 20,
-                    Text.translatable("options.tag-highlight.stats_mode.red", (int)(TagHighlightClient.CONFIG.statsModeRed * 255)),
+            SliderWidget statsRedSlider = new SliderWidget(this.width / 2 - 100, yBase + 206, 200, 20,
+                    Text.translatable("options.tag-highlight.stats_mode.red", (int) (TagHighlightClient.CONFIG.statsModeRed * 255)),
                     TagHighlightClient.CONFIG.statsModeRed) {
                 @Override
                 protected void updateMessage() {
@@ -152,14 +142,14 @@ public class TagHighlightModMenu implements ModMenuApi {
 
                 @Override
                 protected void applyValue() {
-                    TagHighlightClient.CONFIG.statsModeRed = (float)this.value;
-                    this.setMessage(Text.translatable("options.tag-highlight.stats_mode.red", (int)(this.value * 255)));
+                    TagHighlightClient.CONFIG.statsModeRed = (float) this.value;
+                    this.setMessage(Text.translatable("options.tag-highlight.stats_mode.red", (int) (this.value * 255)));
                 }
             };
             this.addDrawableChild(statsRedSlider);
 
-            statsGreenSlider = new SliderWidget(this.width / 2 - 100, yBase + 232, 200, 20,
-                    Text.translatable("options.tag-highlight.stats_mode.green", (int)(TagHighlightClient.CONFIG.statsModeGreen * 255)),
+            SliderWidget statsGreenSlider = new SliderWidget(this.width / 2 - 100, yBase + 232, 200, 20,
+                    Text.translatable("options.tag-highlight.stats_mode.green", (int) (TagHighlightClient.CONFIG.statsModeGreen * 255)),
                     TagHighlightClient.CONFIG.statsModeGreen) {
                 @Override
                 protected void updateMessage() {
@@ -168,14 +158,14 @@ public class TagHighlightModMenu implements ModMenuApi {
 
                 @Override
                 protected void applyValue() {
-                    TagHighlightClient.CONFIG.statsModeGreen = (float)this.value;
-                    this.setMessage(Text.translatable("options.tag-highlight.stats_mode.green", (int)(this.value * 255)));
+                    TagHighlightClient.CONFIG.statsModeGreen = (float) this.value;
+                    this.setMessage(Text.translatable("options.tag-highlight.stats_mode.green", (int) (this.value * 255)));
                 }
             };
             this.addDrawableChild(statsGreenSlider);
 
-            statsBlueSlider = new SliderWidget(this.width / 2 - 100, yBase + 258, 200, 20,
-                    Text.translatable("options.tag-highlight.stats_mode.blue", (int)(TagHighlightClient.CONFIG.statsModeBlue * 255)),
+            SliderWidget statsBlueSlider = new SliderWidget(this.width / 2 - 100, yBase + 258, 200, 20,
+                    Text.translatable("options.tag-highlight.stats_mode.blue", (int) (TagHighlightClient.CONFIG.statsModeBlue * 255)),
                     TagHighlightClient.CONFIG.statsModeBlue) {
                 @Override
                 protected void updateMessage() {
@@ -184,14 +174,14 @@ public class TagHighlightModMenu implements ModMenuApi {
 
                 @Override
                 protected void applyValue() {
-                    TagHighlightClient.CONFIG.statsModeBlue = (float)this.value;
-                    this.setMessage(Text.translatable("options.tag-highlight.stats_mode.blue", (int)(this.value * 255)));
+                    TagHighlightClient.CONFIG.statsModeBlue = (float) this.value;
+                    this.setMessage(Text.translatable("options.tag-highlight.stats_mode.blue", (int) (this.value * 255)));
                 }
             };
             this.addDrawableChild(statsBlueSlider);
 
-            statsAlphaSlider = new SliderWidget(this.width / 2 - 100, yBase + 284, 200, 20,
-                    Text.translatable("options.tag-highlight.stats_mode.alpha", (int)(TagHighlightClient.CONFIG.statsModeAlpha * 100)),
+            SliderWidget statsAlphaSlider = new SliderWidget(this.width / 2 - 100, yBase + 284, 200, 20,
+                    Text.translatable("options.tag-highlight.stats_mode.alpha", (int) (TagHighlightClient.CONFIG.statsModeAlpha * 100)),
                     TagHighlightClient.CONFIG.statsModeAlpha) {
                 @Override
                 protected void updateMessage() {
@@ -200,8 +190,8 @@ public class TagHighlightModMenu implements ModMenuApi {
 
                 @Override
                 protected void applyValue() {
-                    TagHighlightClient.CONFIG.statsModeAlpha = (float)this.value;
-                    this.setMessage(Text.translatable("options.tag-highlight.stats_mode.alpha", (int)(this.value * 100)));
+                    TagHighlightClient.CONFIG.statsModeAlpha = (float) this.value;
+                    this.setMessage(Text.translatable("options.tag-highlight.stats_mode.alpha", (int) (this.value * 100)));
                 }
             };
             this.addDrawableChild(statsAlphaSlider);
@@ -210,6 +200,7 @@ public class TagHighlightModMenu implements ModMenuApi {
             ButtonWidget doneButton = ButtonWidget.builder(ScreenTexts.DONE, button -> {
                 // Save config dan kembali ke layar sebelumnya
                 TagHighlightClient.saveConfig();
+                assert this.client != null;
                 this.client.setScreen(this.parent);
             }).dimensions(this.width / 2 - 100, yBase + 316, 200, 20).build();
             this.addDrawableChild(doneButton);
