@@ -9,5 +9,9 @@
   "options.tag-highlight.outline.blue": "Blue: %d",
   "options.tag-highlight.outline.alpha": "Opacity: %d%%",
   "options.tag-highlight.outline.enabled": "Outline Enabled: %s",
-  "options.tag-highlight.preview": "Color Preview"
+  "options.tag-highlight.preview": "Color Preview",
+
+  "message.tag-highlight.same_name": "§cThis mob already has the same name!",
+
+  "options.tag-highlight.prevent_duplicate.enabled": "Prevent Duplicate Names: %s"
 }

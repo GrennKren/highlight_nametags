@@ -113,12 +113,22 @@ public class TagHighlightModMenu implements ModMenuApi {
                     }).dimensions(this.width / 2 - 100, this.height / 6 + 130, 200, 20).build();
             this.addDrawableChild(toggleButton);
 
+            // Tombol toggle untuk mengaktifkan/mematikan pencegahan nama duplikat
+            ButtonWidget preventDuplicateNamesButton = ButtonWidget.builder(
+                    Text.translatable("options.tag-highlight.prevent_duplicate.enabled", TagHighlightClient.CONFIG.preventDuplicateNamesEnabled),
+                    button -> {
+                        TagHighlightClient.CONFIG.preventDuplicateNamesEnabled = !TagHighlightClient.CONFIG.preventDuplicateNamesEnabled;
+                        button.setMessage(Text.translatable("options.tag-highlight.prevent_duplicate.enabled",
+                                TagHighlightClient.CONFIG.preventDuplicateNamesEnabled));
+                    }).dimensions(this.width / 2 - 100, this.height / 6 + 154, 200, 20).build();
+            this.addDrawableChild(preventDuplicateNamesButton);
+
             // Tombol Done
             ButtonWidget doneButton = ButtonWidget.builder(ScreenTexts.DONE, button -> {
                 // Save config dan kembali ke layar sebelumnya
                 TagHighlightClient.saveConfig();
                 this.client.setScreen(this.parent);
-            }).dimensions(this.width / 2 - 100, this.height / 6 + 168, 200, 20).build();
+            }).dimensions(this.width / 2 - 100, this.height / 6 + 192, 200, 20).build();
             this.addDrawableChild(doneButton);
         }
 

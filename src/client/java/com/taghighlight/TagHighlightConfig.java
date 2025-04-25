@@ -9,4 +9,6 @@ public class TagHighlightConfig {
 
     // Toggle apakah outline ditampilkan
     public boolean outlineEnabled = true;
+
+    public boolean preventDuplicateNamesEnabled = true;
 }

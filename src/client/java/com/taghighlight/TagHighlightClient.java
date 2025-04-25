@@ -42,6 +42,9 @@ public class TagHighlightClient implements ClientModInitializer {
 		// Register keybinds
 		TagHighlightKeybinds.register();
 
+		// Register name tag handler to prevent duplicate names
+		TagNameHandler.register();
+
 		// Register tick event untuk menemukan entitas
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.world == null || client.player == null) return;
