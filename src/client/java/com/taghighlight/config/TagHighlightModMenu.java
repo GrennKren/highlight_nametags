@@ -210,6 +210,15 @@ public class TagHighlightModMenu implements ModMenuApi {
         public void render(DrawContext context, int mouseX, int mouseY, float delta) {
             this.renderBackground(context, mouseX, mouseY, delta);
 
+            // First render all the widgets
+            super.render(context, mouseX, mouseY, delta);
+
+            // Then render the color previews *after* all widgets
+            renderColorPreviews(context);
+        }
+
+        // Separate method to render color previews - this helps ensure they always appear on top
+        private void renderColorPreviews(DrawContext context) {
             // Render normal mode color preview box
             int previewX = this.width / 2 + PREVIEW_X_OFFSET;
             int previewY = this.height / 6 + PREVIEW_Y_OFFSET;
@@ -221,33 +230,8 @@ public class TagHighlightModMenu implements ModMenuApi {
             int alpha = (int)(TagHighlightClient.CONFIG.outlineAlpha * 255);
             int color = (alpha << 24) | (red << 16) | (green << 8) | blue;
 
-            // Draw outer border (black)
-            context.fill(previewX - 2, previewY - 2, previewX + PREVIEW_SIZE + 2, previewY + PREVIEW_SIZE + 2, 0xFF000000);
-
-            // Draw inner border (white)
-            context.fill(previewX - 1, previewY - 1, previewX + PREVIEW_SIZE + 1, previewY + PREVIEW_SIZE + 1, 0xFFFFFFFF);
-
-            // Draw color preview with exact pixel values
-            context.fill(previewX, previewY, previewX + PREVIEW_SIZE, previewY + PREVIEW_SIZE, color);
-
-            // Draw a grid pattern on transparent backgrounds to better show transparency
-            if (TagHighlightClient.CONFIG.outlineAlpha < 1.0f) {
-                int gridSize = 5;
-                for (int x = 0; x < PREVIEW_SIZE; x += gridSize) {
-                    for (int y = 0; y < PREVIEW_SIZE; y += gridSize) {
-                        boolean isCheckerboard = (x / gridSize + y / gridSize) % 2 == 0;
-                        if (isCheckerboard) {
-                            context.fill(
-                                    previewX + x,
-                                    previewY + y,
-                                    Math.min(previewX + x + gridSize, previewX + PREVIEW_SIZE),
-                                    Math.min(previewY + y + gridSize, previewY + PREVIEW_SIZE),
-                                    0x22000000
-                            );
-                        }
-                    }
-                }
-            }
+            // Draw preview with borders
+            drawColorPreview(context, previewX, previewY, color, TagHighlightClient.CONFIG.outlineAlpha < 1.0f);
 
             // Render stats mode color preview box
             previewY = this.height / 6 + STATS_PREVIEW_Y_OFFSET;
@@ -259,35 +243,39 @@ public class TagHighlightModMenu implements ModMenuApi {
             alpha = (int)(TagHighlightClient.CONFIG.statsModeAlpha * 255);
             color = (alpha << 24) | (red << 16) | (green << 8) | blue;
 
+            // Draw preview with borders
+            drawColorPreview(context, previewX, previewY, color, TagHighlightClient.CONFIG.statsModeAlpha < 1.0f);
+        }
+
+        // Helper method to draw a color preview with borders and optional transparency grid
+        private void drawColorPreview(DrawContext context, int x, int y, int color, boolean showTransparencyGrid) {
             // Draw outer border (black)
-            context.fill(previewX - 2, previewY - 2, previewX + PREVIEW_SIZE + 2, previewY + PREVIEW_SIZE + 2, 0xFF000000);
-//
+            context.fill(x - 2, y - 2, x + TagHighlightConfigScreen.PREVIEW_SIZE + 2, y + TagHighlightConfigScreen.PREVIEW_SIZE + 2, 0xFF000000);
+
             // Draw inner border (white)
-            context.fill(previewX - 1, previewY - 1, previewX + PREVIEW_SIZE + 1, previewY + PREVIEW_SIZE + 1, 0xFFFFFFFF);
+            context.fill(x - 1, y - 1, x + TagHighlightConfigScreen.PREVIEW_SIZE + 1, y + TagHighlightConfigScreen.PREVIEW_SIZE + 1, 0xFFFFFFFF);
 
             // Draw color preview with exact pixel values
-            context.fill(previewX, previewY, previewX + PREVIEW_SIZE, previewY + PREVIEW_SIZE, color);
+            context.fill(x, y, x + TagHighlightConfigScreen.PREVIEW_SIZE, y + TagHighlightConfigScreen.PREVIEW_SIZE, color);
 
             // Draw a grid pattern on transparent backgrounds to better show transparency
-            if (TagHighlightClient.CONFIG.statsModeAlpha < 1.0f) {
+            if (showTransparencyGrid) {
                 int gridSize = 5;
-                for (int x = 0; x < PREVIEW_SIZE; x += gridSize) {
-                    for (int y = 0; y < PREVIEW_SIZE; y += gridSize) {
-                        boolean isCheckerboard = (x / gridSize + y / gridSize) % 2 == 0;
+                for (int gx = 0; gx < TagHighlightConfigScreen.PREVIEW_SIZE; gx += gridSize) {
+                    for (int gy = 0; gy < TagHighlightConfigScreen.PREVIEW_SIZE; gy += gridSize) {
+                        boolean isCheckerboard = (gx / gridSize + gy / gridSize) % 2 == 0;
                         if (isCheckerboard) {
                             context.fill(
-                                    previewX + x,
-                                    previewY + y,
-                                    Math.min(previewX + x + gridSize, previewX + PREVIEW_SIZE),
-                                    Math.min(previewY + y + gridSize, previewY + PREVIEW_SIZE),
+                                    x + gx,
+                                    y + gy,
+                                    Math.min(x + gx + gridSize, x + TagHighlightConfigScreen.PREVIEW_SIZE),
+                                    Math.min(y + gy + gridSize, y + TagHighlightConfigScreen.PREVIEW_SIZE),
                                     0x22000000
                             );
                         }
                     }
                 }
             }
-
-            super.render(context, mouseX, mouseY, delta);
         }
     }
 }
