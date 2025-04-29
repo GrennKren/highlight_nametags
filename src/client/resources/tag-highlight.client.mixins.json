@@ -3,7 +3,8 @@
 	"package": "com.taghighlight.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"ExampleClientMixin"
+		"ExampleClientMixin",
+		"EntityOutlineMixin",
 	],
 	"injectors": {
 		"defaultRequire": 1

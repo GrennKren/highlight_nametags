@@ -1,4 +1,4 @@
-// First, update TagHighlightConfig.java to add the new properties
+// Update src/client/java/com/taghighlight/TagHighlightConfig.java
 package com.taghighlight;
 
 public class TagHighlightConfig {
@@ -10,6 +10,9 @@ public class TagHighlightConfig {
 
     // Toggle apakah outline ditampilkan
     public boolean outlineEnabled = true;
+
+    // Outline style (0 = box outline, 1 = entity outline)
+    public int outlineStyle = 0;
 
     public boolean preventDuplicateNamesEnabled = true;
 

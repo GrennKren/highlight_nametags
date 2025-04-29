@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 public class TagHighlightClient implements ClientModInitializer {
-	private static final double HIGHLIGHT_RADIUS = 50.0;
+	//private static final double HIGHLIGHT_RADIUS = 50.0;
 	private static final List<Entity> entitiesToHighlight = new ArrayList<>();
 	private static final List<Entity> statsMatchingEntities = new ArrayList<>();
 	private static final Map<String, Integer> entityTypeCount = new HashMap<>();
@@ -78,17 +78,14 @@ public class TagHighlightClient implements ClientModInitializer {
 				currentHeldTagName = heldItem.getName().getString();
 			}
 
-			Vec3d playerPos = client.player.getPos();
-			Box searchBox = new Box(
-					playerPos.x - HIGHLIGHT_RADIUS, playerPos.y - HIGHLIGHT_RADIUS, playerPos.z - HIGHLIGHT_RADIUS,
-					playerPos.x + HIGHLIGHT_RADIUS, playerPos.y + HIGHLIGHT_RADIUS, playerPos.z + HIGHLIGHT_RADIUS
-			);
-
-			// Find entities based on current mode
+			// Find entities based on current mode - use all visible entities instead of a fixed radius
 			if (CONFIG.statsMode && currentHeldTagName != null) {
 				// Stats mode - find entities with same name as the held tag
-				for (Entity entity : client.world.getEntitiesByClass(MobEntity.class, searchBox, e -> true)) {
-					if (entity.hasCustomName() && entity.getCustomName() != null && entity.getCustomName().getString().equals(currentHeldTagName)) {
+				for (Entity entity : client.world.getEntities()) {
+					if (entity instanceof MobEntity && entity.hasCustomName() &&
+							entity.getCustomName() != null &&
+							entity.getCustomName().getString().equals(currentHeldTagName)) {
+
 						statsMatchingEntities.add(entity);
 
 						// Count by entity type
@@ -98,8 +95,8 @@ public class TagHighlightClient implements ClientModInitializer {
 				}
 			} else if (!CONFIG.statsMode) {
 				// Normal mode - find entities without custom names
-				for (Entity entity : client.world.getEntitiesByClass(MobEntity.class, searchBox, e -> true)) {
-					if (!entity.hasCustomName() && entity != client.player) {
+				for (Entity entity : client.world.getEntities()) {
+					if (entity instanceof MobEntity && !entity.hasCustomName() && entity != client.player) {
 						entitiesToHighlight.add(entity);
 					}
 				}
@@ -111,76 +108,78 @@ public class TagHighlightClient implements ClientModInitializer {
 			MinecraftClient client = MinecraftClient.getInstance();
 			if (client.world == null || client.player == null) return;
 
-			MatrixStack matrices = context.matrixStack();
-			Vec3d cameraPos = context.camera().getPos();
-			VertexConsumerProvider vertexConsumers = context.consumers();
-			if (vertexConsumers == null) return;
+			if (CONFIG.outlineEnabled && CONFIG.outlineStyle == 0) {
+				MatrixStack matrices = context.matrixStack();
+				Vec3d cameraPos = context.camera().getPos();
+				VertexConsumerProvider vertexConsumers = context.consumers();
+				if (vertexConsumers == null) return;
 
-			// Simpan state OpenGL
-			boolean depthEnabled = GL11.glGetBoolean(GL11.GL_DEPTH_TEST);
-			boolean blendEnabled = GL11.glGetBoolean(GL11.GL_BLEND);
-			boolean cullEnabled  = GL11.glGetBoolean(GL11.GL_CULL_FACE);
-			int oldDepthFunc = GL11.glGetInteger(GL11.GL_DEPTH_FUNC);
+				// Simpan state OpenGL
+				boolean depthEnabled = GL11.glGetBoolean(GL11.GL_DEPTH_TEST);
+				boolean blendEnabled = GL11.glGetBoolean(GL11.GL_BLEND);
+				boolean cullEnabled = GL11.glGetBoolean(GL11.GL_CULL_FACE);
+				int oldDepthFunc = GL11.glGetInteger(GL11.GL_DEPTH_FUNC);
 
-			// Setup state untuk outline (x-ray effect)
-			RenderSystem.enableBlend();
-			RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			RenderSystem.disableCull();
-			GL11.glDepthFunc(GL11.GL_ALWAYS);
-			RenderSystem.enableDepthTest();
-			RenderSystem.depthMask(false);
+				// Setup state untuk outline (x-ray effect)
+				RenderSystem.enableBlend();
+				RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				RenderSystem.disableCull();
+				GL11.glDepthFunc(GL11.GL_ALWAYS);
+				RenderSystem.enableDepthTest();
+				RenderSystem.depthMask(false);
 
-			// Dapatkan buffer untuk menggambar garis
-			VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
-			VertexConsumer lineConsumer = immediate.getBuffer(RenderLayer.getLines());
+				// Dapatkan buffer untuk menggambar garis
+				VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
+				VertexConsumer lineConsumer = immediate.getBuffer(RenderLayer.getLines());
 
-			// Chose which entity list and colors to use based on current mode
-			List<Entity> entitiesToRender = CONFIG.statsMode ? statsMatchingEntities : entitiesToHighlight;
-			float red, green, blue, alpha;
+				// Chose which entity list and colors to use based on current mode
+				List<Entity> entitiesToRender = CONFIG.statsMode ? statsMatchingEntities : entitiesToHighlight;
+				float red, green, blue, alpha;
 
-			if (CONFIG.statsMode) {
-				red = CONFIG.statsModeRed;
-				green = CONFIG.statsModeGreen;
-				blue = CONFIG.statsModeBlue;
-				alpha = CONFIG.statsModeAlpha;
-			} else {
-				red = CONFIG.outlineRed;
-				green = CONFIG.outlineGreen;
-				blue = CONFIG.outlineBlue;
-				alpha = CONFIG.outlineAlpha;
-			}
-
-			// Jika outline diaktifkan di config dan ada entitas untuk di-render
-			if (CONFIG.outlineEnabled && !entitiesToRender.isEmpty()) {
-
-				// Get the tickDelta from the context
-				float tickDelta = context.tickCounter().getTickDelta(true);
-
-				for (Entity entity : entitiesToRender) {
-                    assert matrices != null;
-                    matrices.push();
-					// Use interpolated positions with tickDelta
-					Vec3d interpolatedPos = entity.getLerpedPos(tickDelta);
-					double x = interpolatedPos.x - cameraPos.x;
-					double y = interpolatedPos.y - cameraPos.y;
-					double z = interpolatedPos.z - cameraPos.z;
-
-					matrices.translate(x, y, z);
-
-					Box box = entity.getBoundingBox().offset(-entity.getX(), -entity.getY(), -entity.getZ());
-					drawOutlineBox(matrices, lineConsumer, box, red, green, blue, alpha);
-					matrices.pop();
+				if (CONFIG.statsMode) {
+					red = CONFIG.statsModeRed;
+					green = CONFIG.statsModeGreen;
+					blue = CONFIG.statsModeBlue;
+					alpha = CONFIG.statsModeAlpha;
+				} else {
+					red = CONFIG.outlineRed;
+					green = CONFIG.outlineGreen;
+					blue = CONFIG.outlineBlue;
+					alpha = CONFIG.outlineAlpha;
 				}
+
+				// Jika outline diaktifkan di config dan ada entitas untuk di-render
+				if (CONFIG.outlineEnabled && !entitiesToRender.isEmpty()) {
+
+					// Get the tickDelta from the context
+					float tickDelta = context.tickCounter().getTickDelta(true);
+
+					for (Entity entity : entitiesToRender) {
+						assert matrices != null;
+						matrices.push();
+						// Use interpolated positions with tickDelta
+						Vec3d interpolatedPos = entity.getLerpedPos(tickDelta);
+						double x = interpolatedPos.x - cameraPos.x;
+						double y = interpolatedPos.y - cameraPos.y;
+						double z = interpolatedPos.z - cameraPos.z;
+
+						matrices.translate(x, y, z);
+
+						Box box = entity.getBoundingBox().offset(-entity.getX(), -entity.getY(), -entity.getZ());
+						drawOutlineBox(matrices, lineConsumer, box, red, green, blue, alpha);
+						matrices.pop();
+					}
+				}
+
+				immediate.draw();
+
+				// Kembalikan state OpenGL
+				RenderSystem.depthMask(true);
+				GL11.glDepthFunc(oldDepthFunc);
+				if (!depthEnabled) RenderSystem.disableDepthTest();
+				if (!blendEnabled) RenderSystem.disableBlend();
+				if (cullEnabled) RenderSystem.enableCull();
 			}
-
-			immediate.draw();
-
-			// Kembalikan state OpenGL
-			RenderSystem.depthMask(true);
-			GL11.glDepthFunc(oldDepthFunc);
-			if (!depthEnabled) RenderSystem.disableDepthTest();
-			if (!blendEnabled) RenderSystem.disableBlend();
-			if (cullEnabled) RenderSystem.enableCull();
 		});
 
 		HudLayerRegistrationCallback.EVENT.register(layers -> layers.attachLayerBefore(IdentifiedLayer.CHAT, MY_HUD_LAYER, (drawContext, tickDelta) -> {
@@ -219,6 +218,14 @@ public class TagHighlightClient implements ClientModInitializer {
 				}
 			}
 		}));
+	}
+
+	public static List<Entity> getEntitiesToHighlight() {
+		return entitiesToHighlight;
+	}
+
+	public static List<Entity> getStatsMatchingEntities() {
+		return statsMatchingEntities;
 	}
 
 	// Helper method to get readable entity type name

@@ -13,6 +13,8 @@
   "options.tag-highlight.outline.alpha": "Outline Opacity: %d%%",
   "options.tag-highlight.outline.enabled": "Show Outline: %s",
 
+  "options.tag-highlight.outline.style": "Outline Style: %s",
+
   "options.tag-highlight.stats_mode.red": "Stats Mode Red: %d",
   "options.tag-highlight.stats_mode.green": "Stats Mode Green: %d",
   "options.tag-highlight.stats_mode.blue": "Stats Mode Blue: %d",
