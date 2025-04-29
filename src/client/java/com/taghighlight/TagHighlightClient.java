@@ -152,12 +152,19 @@ public class TagHighlightClient implements ClientModInitializer {
 
 			// Jika outline diaktifkan di config dan ada entitas untuk di-render
 			if (CONFIG.outlineEnabled && !entitiesToRender.isEmpty()) {
+
+				// Get the tickDelta from the context
+				float tickDelta = context.tickCounter().getTickDelta(true);
+
 				for (Entity entity : entitiesToRender) {
                     assert matrices != null;
                     matrices.push();
-					double x = entity.getX() - cameraPos.x;
-					double y = entity.getY() - cameraPos.y;
-					double z = entity.getZ() - cameraPos.z;
+					// Use interpolated positions with tickDelta
+					Vec3d interpolatedPos = entity.getLerpedPos(tickDelta);
+					double x = interpolatedPos.x - cameraPos.x;
+					double y = interpolatedPos.y - cameraPos.y;
+					double z = interpolatedPos.z - cameraPos.z;
+
 					matrices.translate(x, y, z);
 
 					Box box = entity.getBoundingBox().offset(-entity.getX(), -entity.getY(), -entity.getZ());
