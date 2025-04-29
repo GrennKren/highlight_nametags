@@ -5,6 +5,7 @@
 	"client": [
 		"ExampleClientMixin",
 		"EntityOutlineMixin",
+		"EntityColorMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
